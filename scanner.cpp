@@ -1,15 +1,13 @@
 #include "scanner.h"
 
 // putback() puts its argument back into the Token_stream's buffer
-void Token_stream::putback(Token t)
-{
+void Token_stream::putback(Token t) {
     if (full) throw runtime_error("putback into a full buffer");
     buffer = t;             // copy t to buffer
     full = true;            // buffer is now full
 }
 
-Token Token_stream::get()
-{
+Token Token_stream::get() {
     if (full) {             // do we already have a Token ready?
         full = false;       // remove token from buffer
         return buffer;
@@ -37,7 +35,8 @@ Token Token_stream::get()
 	s += ch;
 	while (cin.get(ch) && (isalpha(ch) || isdigit(ch) || ch=='_')) s += ch;
 	cin.unget();
-        if (s == "int") return Token(INT);	    
+        if (s == "int") 
+            return Token(INT);	    
         if (regex_match(s, regex("[A-Za-z][A-Za-z0-9]*")))
             return Token(ID, s);
         else

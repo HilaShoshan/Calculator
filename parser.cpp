@@ -1,34 +1,45 @@
 #include "scanner.h"
 #include "symtab.h"
+
+
 // globals
 Token_stream ts;
 Symbol_table st; 
-//map<string, int> names;
 
-int statement()
-{
-	Token t = ts.get();        // get the next token from token stream
+int statement() {
+	Token t = ts.get();  // get the next token from token stream
 	switch (t.kind) {
 	case INT:
 		return declaration();
+    case IF:
+        return condition();
 	default:
-		ts.putback(t);     // put t back into the token stream
+		ts.putback(t);  // put t back into the token stream
 		return expression();
 	}
 }
 
-int declaration()
-{
+int declaration() {
 	Token t = ts.get();
 	if (t.kind != ID) throw runtime_error("name expected in declaration");
 	string name = t.name;
-        st.declare(name, 0);
+    st.declare(name, 0);
 	return 0;
 }
 
+int condition() {
+    int cond = primary(); 
+    int stmt1 = expression();  // true case
+    Token t = ts.get();  
+    if(t.kind != ELSE) throw runtime_error("else expected in condition");
+    int stmt2 = expression();  // false case
+
+    if (cond) return stmt1; 
+    else return stmt2; 
+}
+
 // + and -
-int expression()
-{
+int expression() {
     int left = term();      // read and evaluate a Term
     Token t = ts.get();        // get the next token from token stream
 
@@ -42,6 +53,22 @@ int expression()
             left -= term();    // evaluate Term and subtract
             t = ts.get();
             break;
+        case '<':
+            left = left < term();
+            t = ts.get();
+            break;
+        case '>':
+            left = left > term();
+            t = ts.get();
+            break;
+        case '|':
+            left = left || expression();
+            t = ts.get();
+            break;
+        case '&':
+            left = left && expression();
+            t = ts.get();
+            break;
         default:
             ts.putback(t);     // put t back into the token stream
             return left;       // finally: no more + or -: return the answer
@@ -50,8 +77,7 @@ int expression()
 }
 
 // * and /
-int term()
-{
+int term() {
     int left = primary();
     Token t = ts.get();
 
@@ -76,8 +102,7 @@ int term()
     }
 }
 
-int primary()
-{
+int primary() {
     Token t = ts.get();
     int result;
     switch (t.kind) {
@@ -86,28 +111,30 @@ int primary()
         int d = expression();
         t = ts.get();
         if (t.kind != ')') throw runtime_error("')' expected");
-            return d;
+        return d;
     }
     case '-':
-	return - primary();
+	    return -primary();
     case '+':
-	return primary();
+	    return primary();
     case NUM:
         return t.value;  // return the number value
     case ID:
     {
-	string n = t.name;
-	Token next = ts.get();
-	if (next.kind == '=') {	// name = expression
+        string n = t.name;
+        Token next = ts.get();
+        if (next.kind == '=') {	// name = expression
             int d = expression();
-	    st.set(n, d);
+            st.set(n, d);
             return d; // return the assignment value
-	}
-	else {
+        }
+        else {
             ts.putback(next);		// not an assignment
             return st.get(t.name).value;  // return the id value
-	}
+        }
     }
+    case '!':
+        return !primary();
     default:
         throw runtime_error("primary expected");
     }
