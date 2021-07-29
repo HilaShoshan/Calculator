@@ -6,6 +6,7 @@
 #include<stdexcept>
 using namespace std;
 
+
 enum Tokens {
     NUM = 20,
     ID = 21,

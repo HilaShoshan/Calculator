@@ -1,5 +1,6 @@
 #include "scanner.h"
 
+
 // putback() puts its argument back into the Token_stream's buffer
 void Token_stream::putback(Token t) {
     if (full) throw runtime_error("putback into a full buffer");
@@ -28,32 +29,33 @@ Token Token_stream::get() {
         }
         return get();
     default:
-    if (isdigit(ch)) {
-        string s;
-        s += ch;
-        while (cin.get(ch) && isdigit(ch)) 
+        if (isdigit(ch)) {
+            string s;
             s += ch;
-        cin.unget();
-        return Token(NUM, stoi(s));
-    }
-    if (isalpha(ch) || ch == '_') {
-        string s;
-        s += ch;
-        while (cin.get(ch) && (isalpha(ch) || isdigit(ch) || ch=='_')) 
+            while (cin.get(ch) && isdigit(ch)) 
+                s += ch;
+            cin.unget();
+            return Token(NUM, stoi(s));
+        }
+        if (isalpha(ch) || ch == '_') {
+            string s;
             s += ch;
-        cin.unget();
-        if (s == "int") 
-            return Token(INT);	    
-        if (regex_match(s, regex("[A-Za-z][A-Za-z0-9]*")))
-            return Token(ID, s);
-        if (s == "if") 
-            return Token(IF);
-        if (s == "else") 
-            return Token(ELSE);
-        else
-            throw runtime_error("Illegal name");
-    }
-    throw runtime_error("Bad token");
+            while (cin.get(ch) && (isalpha(ch) || isdigit(ch) || ch == '_')) 
+                s += ch;
+            cin.unget();
+            if (s == "int") 
+                return Token(INT);	    
+            if (s == "if") {
+                return Token(IF);
+            }
+            if (s == "else") 
+                return Token(ELSE);
+            if (regex_match(s, regex("[A-Za-z][A-Za-z0-9]*")))  // a name that is not 'if' or 'else'
+                return Token(ID, s);
+            else
+                throw runtime_error("Illegal name");
+        }
+        throw runtime_error("Bad token");
     }
 }
 

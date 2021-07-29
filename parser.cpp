@@ -38,10 +38,10 @@ int condition() {
     else return stmt2; 
 }
 
-// + and -
+// + , -  and < , > , | , &
 int expression() {
     int left = term();      // read and evaluate a Term
-    Token t = ts.get();        // get the next token from token stream
+    Token t = ts.get();     // get the next token from token stream
 
     while (true) {
         switch (t.kind) {
@@ -54,19 +54,19 @@ int expression() {
             t = ts.get();
             break;
         case '<':
-            left = left < term();
+            left = (left < term());
             t = ts.get();
             break;
         case '>':
-            left = left > term();
+            left = (left > term());
             t = ts.get();
             break;
         case '|':
-            left = left || expression();
+            left = (left || expression());
             t = ts.get();
             break;
         case '&':
-            left = left && expression();
+            left = (left && expression());
             t = ts.get();
             break;
         default:
